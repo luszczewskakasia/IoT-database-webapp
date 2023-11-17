@@ -1,5 +1,5 @@
 import json
-import get_data
+import pandas as pd
 
 import plotly.graph_objects as go
 
@@ -10,7 +10,7 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 import statistics
 
-df = get_data.gdf_fires
+df = pd.read_csv('df.csv')
 with open("gz_2010_us_040_00_5m_1.json", 'r') as f:
     states = json.load(f)
 
