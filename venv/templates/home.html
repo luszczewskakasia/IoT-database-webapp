@@ -1,7 +1,41 @@
 <html>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table { 
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 4px;
+            margin: 4px;
+            text-align:center;
+        }
+    </style>
     <body>
         <div>
-            <p>mgr!</p>
+            <h1>Sensor Data</h1>
+            <table border="1">
+                <tr>
+                    <th>ID</th>
+                    <th>Time</th>
+                    <th>Sensor Type</th>
+                    <th>Sensor Value</th>
+                </tr>
+                {% for data in sensor_data %}
+                <tr>
+                    <td>{{ data.id }}</td>
+                    <td>{{ data.time }}</td>
+                    <td>{{ data.sensor_type }}</td>
+                    <td>{{ data.sensor_value }}</td>
+                </tr>
+                {% endfor %}
+
+            </table>
+
         </div>
     </body>
 </html>
