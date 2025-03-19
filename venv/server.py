@@ -1,29 +1,35 @@
 from flask import Flask
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, request, url_for
 from flask_sqlalchemy import SQLAlchemy
+from database import SensorData,  db
+import json
+import requests
+from flask import jsonify
 
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
-db = SQLAlchemy(app)
+# db = SQLAlchemy(app)
+db.init_app(app)
 
-class SensorData(db.Model):
-    __tablename__ = 'sensor_data'
-    id = db.Column(db.Integer, primary_key=True)
-    time = db.Column(db.String)
-    sensor_type = db.Column(db.String)
-    sensor_value = db.Column(db.Float)
-
-    def __init__(self, time, sensor_type, sensor_value):
-        self.time = time
-        self.sensor_type = sensor_type
-        self.sensor_value = sensor_value   
-
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 def home():
-    sensor_data = SensorData.query.order_by(SensorData.time.desc()).limit(10).all()
+    sensor_data = SensorData.query.all()
     return render_template('home.html',sensor_data=sensor_data)
     #   return redirect(url_for('login'))
+
+@app.route('/api/data', methods=['GET'])
+def get_data():
+    """API Endpoint to get latest records"""
+    limit = request.args.get('limit', default=100, type=int)
+    sensor_type = request.args.get('type', default='Temperature', type=str)
+    sensor_data = SensorData.query.filter(SensorData.sensor_type == sensor_type).order_by(SensorData.id).limit(limit).all()
+    formatted_data = [{"timestamp": row.time, "value": row.sensor_value} for row in sensor_data]
+    return jsonify(formatted_data)
+
+@app.route("/data_analysis", methods=['GET', 'POST'])
+def data_analysis():
+    return render_template('data_analysis.html')
 
 @app.route("/login")
 def login():

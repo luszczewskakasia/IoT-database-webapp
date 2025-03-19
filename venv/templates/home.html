@@ -18,16 +18,16 @@
     <body>
         <div>
             <h1>Sensor Data</h1>
+            <button onclick="window.location.href='/data_analysis'">Data Analysis</button>
+            <p></p>
             <table border="1">
                 <tr>
-                    <th>ID</th>
                     <th>Time</th>
                     <th>Sensor Type</th>
                     <th>Sensor Value</th>
                 </tr>
                 {% for data in sensor_data %}
                 <tr>
-                    <td>{{ data.id }}</td>
                     <td>{{ data.time }}</td>
                     <td>{{ data.sensor_type }}</td>
                     <td>{{ data.sensor_value }}</td>
