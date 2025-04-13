@@ -3,8 +3,9 @@ document.addEventListener("DOMContentLoaded", function () {
     let myChart;
 
     async function fetchData(limit, sensorType) {
-    const response = await fetch(`/api/data?limit=${limit}&type=${sensorType}`);
+    const response = await fetch(`http://127.0.0.1:7000/api/data?limit=${limit}&type=${sensorType}`);
     const data = await response.json();
+    console.log(data)
     return {
         timestamp: data.map(data => data.timestamp),
         sensorValue: data.map(data => data.value),              }
@@ -39,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const limit = document.getElementById("data-limit").value;
         const sensorType = document.getElementById("data-type").value;
 
-        fetch(`/api/data?limit=${limit}&type=${sensorType}`)
+        fetch(`http://127.0.0.1:8000/api/data/export_to_csv`)
             .then(response => response.json())
             .then(({ data }) => {
                 let csvContent = "Timestamp,Value\n";

@@ -1,11 +1,9 @@
 import pika    
 import json
-from server import app
-from database import SensorData, db
+from server.server import app
+from database.database import SensorData, db
 
 def data_added(ch, method, properties, body):
-    # print(type(body))
-    # print(type(json.loads(body)))
     body = json.loads(body)
     print(f"Received new sensor data: {body}")
 
@@ -13,10 +11,6 @@ def data_added(ch, method, properties, body):
     name = body['sensor_type']
     val = body['sensor_value']
 
-    # Base.metadata.create_all(engine)
-    # session = Session()
-
-# def sensor(env, name, interval):
     with app.app_context():
         db.session.commit()
         try:

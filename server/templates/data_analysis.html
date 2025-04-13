@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
     <body>
         <label for="data-limit">Show amount of latest measurements:</label>
@@ -22,7 +22,7 @@
             <canvas id="myChart"></canvas>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="/static/data_analysis.js" defer></script>
+        <script src="../static/data_analysis.js" defer></script>
         <button id="export-csv">Export CSV</button>
         <p id="avg-value">Average value: </p>
         <p id="min-value">Min value: </p>
