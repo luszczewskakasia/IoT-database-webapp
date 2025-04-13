@@ -3,16 +3,13 @@ from flask import Flask, render_template, redirect, request, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from database import SensorData, db
-import json
-import requests
 from flask import jsonify
-import numpy as np
 
 app = Flask(__name__)
 CORS(app)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@192.168.100.15:5432/postgres"
 # db = SQLAlchemy(app)
 db.init_app(app)
 @app.route("/", methods=['GET', 'POST'])

@@ -3,7 +3,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let myChart;
 
     async function fetchData(limit, sensorType) {
-    const response = await fetch(`http://127.0.0.1:7000/api/data?limit=${limit}&type=${sensorType}`);
+    // TODO: change it to the name of container; run it with docker compose version 3
+    const response = await fetch(`http://172.17.0.2:5000/api/data/limit=${limit}&type=${sensorType}`);
     const data = await response.json();
     console.log(data)
     return {
