@@ -74,10 +74,31 @@ services:
     depends_on: 
       - server
       - rpi
+      - sensor_db
     volumes:
       - ./producer:/home/test-user/producer
     networks: 
       - container-connection
+  
+  sensor_db:
+    image: postgres
+    restart: always
+    container_name: sensor_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sensor_data
+    # ports:
+    #   - 5432:5432
+    depends_on: 
+      - server
+    volumes:
+      - sensor_data:/var/lib/postgresql/data
+    networks: 
+      - container-connection
+
+volumes:
+  sensor_data:
 
 networks:
   container-connection:

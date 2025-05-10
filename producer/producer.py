@@ -19,7 +19,7 @@ while True:
     channel.queue_declare(queue='sensor_data')
     message = r.text
     channel.basic_publish(exchange='',routing_key='sensor_data', body=message)
-    # logging.info(f"Sent message: {message}")
+    logging.info(f"Sent message: {message}")
     # print(f"new sensor data: {message}")
     connection.close()
     time.sleep(10)

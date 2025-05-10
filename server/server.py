@@ -9,13 +9,20 @@ app = Flask(__name__)
 CORS(app)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@192.168.100.15:5432/postgres"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@sensor_db:5432/postgres"
 # db = SQLAlchemy(app)
 db.init_app(app)
+
+# @app.before_first_request
+# def create_tables():
+#     db.create_all()
+
 @app.route("/", methods=['GET', 'POST'])
 def home():
-    sensor_data = SensorData.query.all()
-    print(sensor_data)
+    # with app.app_context():
+    db.create_all()
+    sensor_data = SensorData.query.order_by(SensorData.id.desc()).limit(50).all()
+    # print(sensor_data)
     return render_template('home.html',sensor_data=sensor_data)
     #   return redirect(url_for('login'))
 
@@ -62,4 +69,4 @@ def data_analysis():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
