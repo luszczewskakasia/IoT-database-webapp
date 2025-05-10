@@ -1,0 +1,85 @@
+version: '3.8'
+services:
+  server:
+    build:
+      context: server
+      dockerfile: Dockerfile
+    container_name: server
+    ports: 
+      - 5000:5000
+    networks: 
+      - container-connection
+
+  display_graph:
+    build:
+      context: display_graph
+      dockerfile: Dockerfile
+    container_name: display_graph
+    ports: 
+      - 5005:5000
+    depends_on: 
+      - server
+    volumes:
+      - ./display_graph:/home/test-user/display_graph
+    networks: 
+      - container-connection
+  
+  rpi:
+    build:
+      context: rpi
+      dockerfile: Dockerfile
+    container_name: rpi_code
+    depends_on: 
+      - server
+    volumes:
+      - ./rpi:/home/test-user/rpi
+    networks: 
+      - container-connection
+  
+  # export_to_csv:
+  #   build:
+  #     context: ./export_to_csv
+  #     dockerfile: Dockerfile
+  #   container_name: export_to_csv
+  #   depends_on: server
+  #   networks: 
+  #     - container-connection
+
+  # get_min_max_avg:
+  #   build:
+  #     context: ./get_min_max_avg
+  #     dockerfile: Dockerfile
+  #   container_name: get_min_max_avg
+  #   depends_on: server
+  #   networks: 
+  #     - container-connection
+
+  consumer:
+    build:
+      context: .
+      dockerfile: consumer/Dockerfile
+    container_name: consumer
+    depends_on: 
+      - server
+    volumes:
+      - ./consumer:/home/test-user/consumer
+    networks: 
+      - container-connection
+      
+  producer:
+    build:
+      context: producer
+      dockerfile: Dockerfile
+    container_name: producer
+    depends_on: 
+      - server
+      - rpi
+    volumes:
+      - ./producer:/home/test-user/producer
+    networks: 
+      - container-connection
+
+networks:
+  container-connection:
+    driver: bridge
+  

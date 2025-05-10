@@ -6,7 +6,7 @@ from database import SensorData, db
 import io, csv
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@192.168.0.101:5432/postgres"
 db.init_app(app)
 CORS(app)
 

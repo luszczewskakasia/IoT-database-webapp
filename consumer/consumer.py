@@ -1,7 +1,17 @@
 import pika    
 import json
-from server.server import app
-from database.database import SensorData, db
+# from server import app
+from database import SensorData, db
+from flask_cors import CORS
+from flask import Flask
+
+app = Flask(__name__)
+CORS(app)
+
+
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@192.168.100.15:5432/postgres"
+# db = SQLAlchemy(app)
+db.init_app(app)
 
 def data_added(ch, method, properties, body):
     body = json.loads(body)
@@ -21,7 +31,7 @@ def data_added(ch, method, properties, body):
             db.session.rollback()
             print(f"Database error: {e}")
             
-conn_params = pika.ConnectionParameters(host='localhost')
+conn_params = pika.ConnectionParameters(host='192.168.100.15')
 
 connection = pika.BlockingConnection(conn_params)
 

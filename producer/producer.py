@@ -1,18 +1,25 @@
 import pika 
 import requests
+import time
+import logging
 
-r = requests.get('http://127.0.0.1:5000/XD')
-print(r.json())
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-conn_params = pika.ConnectionParameters('localhost')
+while True:
+    # TODO: to change to the correct port
+    r = requests.get('http://rpi:5000/XD')
+    print(r.json())
 
-connection = pika.BlockingConnection(conn_params)
-channel = connection.channel()
-#queue='queue_name'
-channel.queue_declare(queue='sensor_data')
-message = r.text
-channel.basic_publish(exchange='',routing_key='sensor_data', body=message)
-print(f"new sensor data: {message}")
-connection.close()
+    # TODO: tu bedzie jakis adres z kontneera rabbita. Teraz jest tutaj mój port
+    conn_params = pika.ConnectionParameters(host='192.168.100.15')
 
-# in while loop or smth like that will request data from sensor
+    connection = pika.BlockingConnection(conn_params)
+    channel = connection.channel()
+    #queue='queue_name'
+    channel.queue_declare(queue='sensor_data')
+    message = r.text
+    channel.basic_publish(exchange='',routing_key='sensor_data', body=message)
+    # logging.info(f"Sent message: {message}")
+    # print(f"new sensor data: {message}")
+    connection.close()
+    time.sleep(10)
