@@ -1,5 +1,6 @@
 import pika    
 import json
+import time
 # from server import app
 from database import SensorData, db
 from flask_cors import CORS
@@ -12,6 +13,15 @@ CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@sensor_db/postgres"
 # db = SQLAlchemy(app)
 db.init_app(app)
+
+def wait_for_rabbitmq(host='rabbitmq'):
+    for i in range(10):
+        try:
+            conn = pika.BlockingConnection(pika.ConnectionParameters(host=host))
+            return conn
+        except pika.exceptions.AMQPConnectionError as e:
+            time.sleep(5)
+# raise Exception("Could not connect to RabbitMQ after several attempts.")
 
 def data_added(ch, method, properties, body):
     body = json.loads(body)
@@ -31,9 +41,7 @@ def data_added(ch, method, properties, body):
             db.session.rollback()
             print(f"Database error: {e}")
             
-conn_params = pika.ConnectionParameters(host='192.168.100.15')
-
-connection = pika.BlockingConnection(conn_params)
+connection = wait_for_rabbitmq()
 
 channel = connection.channel()
 

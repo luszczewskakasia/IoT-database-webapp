@@ -24,6 +24,20 @@ services:
     networks: 
       - container-connection
   
+  get_min_max_avg:
+    build:
+      context: get_min_max_avg
+      dockerfile: Dockerfile
+    container_name: get_min_max_avg
+    ports: 
+      - 5006:5000
+    depends_on: 
+      - server
+    volumes:
+      - ./get_min_max_avg:/home/test-user/get_min_max_avg
+    networks: 
+      - container-connection
+
   rpi:
     build:
       context: rpi
@@ -45,15 +59,6 @@ services:
   #   networks: 
   #     - container-connection
 
-  # get_min_max_avg:
-  #   build:
-  #     context: ./get_min_max_avg
-  #     dockerfile: Dockerfile
-  #   container_name: get_min_max_avg
-  #   depends_on: server
-  #   networks: 
-  #     - container-connection
-
   consumer:
     build:
       context: .
@@ -61,6 +66,7 @@ services:
     container_name: consumer
     depends_on: 
       - server
+      - rabbitmq
     volumes:
       - ./consumer:/home/test-user/consumer
     networks: 
@@ -75,13 +81,27 @@ services:
       - server
       - rpi
       - sensor_db
+      - rabbitmq
     volumes:
       - ./producer:/home/test-user/producer
     networks: 
       - container-connection
   
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    restart: always
+    environment: 
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_lib:/var/lib/rabbitmq
+      - rabbitmq_log:/var/log/rabbitmq
+    networks:
+      - container-connection
+  
   sensor_db:
-    image: postgres
+    image: postgres:17.5
     restart: always
     container_name: sensor_db
     environment:
@@ -98,7 +118,12 @@ services:
       - container-connection
 
 volumes:
+  rabbitmq_lib:
+    driver: local
+  rabbitmq_log:
+    driver: local
   sensor_data:
+    driver: local
 
 networks:
   container-connection:

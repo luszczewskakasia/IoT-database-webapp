@@ -13,6 +13,6 @@ def get_data():
     """API Endpoint to get latest records"""
     limit = request.args.get('limit', default=100, type=int)
     sensor_type = request.args.get('type', default='Temperature', type=str)
-    sensor_data = SensorData.query.filter(SensorData.sensor_type == sensor_type).order_by(SensorData.id).limit(limit).all()
+    sensor_data = SensorData.query.filter(SensorData.sensor_type == sensor_type).order_by(SensorData.id.desc()).limit(limit).all()[::-1]
     formatted_data = [{"timestamp": row.time, "value": row.sensor_value} for row in sensor_data]
     return jsonify(formatted_data)

@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let myChart;
 
     async function fetchData(limit, sensorType) {
-    // TODO: change it to the name of container; run it with docker compose version 3
     const response = await fetch(`http://localhost:5005/api/data?limit=${limit}&type=${sensorType}`);
     const data = await response.json();
     console.log(data)
@@ -37,6 +36,16 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     }
 
+    async function getMinMaxAvg() {
+        const limit = document.getElementById("data-limit").value;
+        const sensorType = document.getElementById("data-type").value;
+        const response = await fetch(`http://localhost:5006/api/data/min_max?limit=${limit}&type=${sensorType}`);
+        const data = await response.json();
+        document.getElementById("min-value").textContent = `Min value: ${data.min}`;
+        document.getElementById("max-value").textContent = `Max value: ${data.max}`;
+        document.getElementById("avg-value").textContent = `Avg value: ${data.average.toFixed(2)}`;
+    }
+
     function exportCSV() {
         const limit = document.getElementById("data-limit").value;
         const sensorType = document.getElementById("data-type").value;
@@ -56,6 +65,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 link.click();
             });
     }
+    document.getElementById('data-type').addEventListener('change', function () {
+        getMinMaxAvg();
+    });
+
+    document.getElementById('data-limit').addEventListener('change', function () {
+        getMinMaxAvg();
+    });
 
     document.getElementById('data-limit').addEventListener('change', function () {
         updateChart();
@@ -70,5 +86,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     );
     updateChart();
+    getMinMaxAvg();
 
 });
