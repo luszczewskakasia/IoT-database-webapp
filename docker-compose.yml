@@ -1,9 +1,10 @@
-version: '3.8'
+version: '3'
 services:
   server:
     build:
       context: server
       dockerfile: Dockerfile
+    image:  server
     container_name: server
     ports: 
       - 5000:5000
@@ -14,6 +15,7 @@ services:
     build:
       context: display_graph
       dockerfile: Dockerfile
+    image:  display_graph
     container_name: display_graph
     ports: 
       - 5005:5000
@@ -28,6 +30,7 @@ services:
     build:
       context: get_min_max_avg
       dockerfile: Dockerfile
+    image:  get_min_max_avg
     container_name: get_min_max_avg
     ports: 
       - 5006:5000
@@ -35,18 +38,6 @@ services:
       - server
     volumes:
       - ./get_min_max_avg:/home/test-user/get_min_max_avg
-    networks: 
-      - container-connection
-
-  rpi:
-    build:
-      context: rpi
-      dockerfile: Dockerfile
-    container_name: rpi_code
-    depends_on: 
-      - server
-    volumes:
-      - ./rpi:/home/test-user/rpi
     networks: 
       - container-connection
   
@@ -59,16 +50,31 @@ services:
   #   networks: 
   #     - container-connection
 
+
+  rpi:
+    build:
+      context: rpi
+      dockerfile: Dockerfile
+    image:  rpi
+    container_name: rpi_code
+    depends_on: 
+      - server
+    volumes:
+      - ./rpi:/home/test-user/rpi
+    networks: 
+      - container-connection
+  
   consumer:
     build:
-      context: .
-      dockerfile: consumer/Dockerfile
+      context: consumer
+      dockerfile: Dockerfile
+    image:  consumer
     container_name: consumer
     depends_on: 
       - server
       - rabbitmq
-    volumes:
-      - ./consumer:/home/test-user/consumer
+    # volumes:
+    #   - ./consumer:/home/test-user/consumer
     networks: 
       - container-connection
       
@@ -76,6 +82,7 @@ services:
     build:
       context: producer
       dockerfile: Dockerfile
+    image:  producer
     container_name: producer
     depends_on: 
       - server

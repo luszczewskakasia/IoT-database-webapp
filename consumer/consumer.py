@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@sensor_db/postgres"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@sensor_db:5432/postgres"
 # db = SQLAlchemy(app)
 db.init_app(app)
 
@@ -21,7 +21,6 @@ def wait_for_rabbitmq(host='rabbitmq'):
             return conn
         except pika.exceptions.AMQPConnectionError as e:
             time.sleep(5)
-# raise Exception("Could not connect to RabbitMQ after several attempts.")
 
 def data_added(ch, method, properties, body):
     body = json.loads(body)

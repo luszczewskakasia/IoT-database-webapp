@@ -20,13 +20,3 @@ def get_min_max_last_hour():
     max = np.max([row.sensor_value for row in sensor_data])
     average = sum([row.sensor_value for row in sensor_data])/len(sensor_data)
     return jsonify({"min": min, "max": max, "average": average})
-
-# @app.route('/api/data/average', methods=['GET'])
-# def get_average():
-#     """API Endpoint to get average of sensor values"""
-#     limit = request.args.get('limit', default=100, type=int)
-#     sensor_type = request.args.get('type', default='Temperature', type=str)
-#     sensor_data = SensorData.query.filter(SensorData.sensor_type == sensor_type).order_by(SensorData.id).limit(limit).all()
-    
-#     return jsonify({"average": average})
-

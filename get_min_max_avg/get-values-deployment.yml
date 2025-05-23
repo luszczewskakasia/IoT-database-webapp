@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment  
+metadata:
+  name: get-values-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: get-values
+  template:
+    metadata:
+      labels:
+        app: get-values
+    spec:
+      containers:
+      - name: get-values
+        image: 192.168.0.103:8000/get_min_max_avg
+        ports:
+        - containerPort: 5004
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: get-values-service
+  labels:
+    app: get-values
+spec:
+  selector:
+    app: get-values
+  ports:
+    - protocol: TCP
+      port: 5004
+      targetPort: 5004
+  type: ClusterIP
+---

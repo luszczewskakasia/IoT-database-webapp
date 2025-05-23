@@ -13,7 +13,6 @@ CORS(app)
 
 @app.route('/api/data/export_to_csv', methods=['GET'])
 def export_to_csv():
-    print("dupa")
     dest = io.StringIO()
     writer = csv.writer(dest)
     sensor_data = SensorData.query.all()
