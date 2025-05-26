@@ -41,14 +41,19 @@ services:
     networks: 
       - container-connection
   
-  # export_to_csv:
-  #   build:
-  #     context: ./export_to_csv
-  #     dockerfile: Dockerfile
-  #   container_name: export_to_csv
-  #   depends_on: server
-  #   networks: 
-  #     - container-connection
+  export_to_csv:
+    build:
+      context: export_to_csv
+      dockerfile: Dockerfile
+    container_name: export_to_csv
+    ports:
+      - 5007:5000
+    depends_on: 
+      - server
+    volumes:
+      - ./export_to_csv:/home/test-user/export_to_csv
+    networks: 
+      - container-connection
 
 
   rpi:
