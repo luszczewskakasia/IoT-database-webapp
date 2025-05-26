@@ -17,6 +17,15 @@ spec:
         image: 192.168.0.103:8000/consumer:0.0.1
         ports:
         - containerPort: 5001
+        env: 
+        - name: RABBITMQ_HOST
+          value: "rabbitmq"
+        - name: RABBITMQ_PORT
+          value: "5672"
+        - name: RABBITMQ_USER
+          value: "guest"
+        - name: RABBITMQ_PAS
+          value: "guest"
 ---
 apiVersion: v1
 kind: Service

@@ -45,6 +45,7 @@ services:
     build:
       context: export_to_csv
       dockerfile: Dockerfile
+    image:  export_to_csv
     container_name: export_to_csv
     ports:
       - 5007:5000
