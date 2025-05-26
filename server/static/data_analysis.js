@@ -49,22 +49,27 @@ document.addEventListener("DOMContentLoaded", function () {
     function exportCSV() {
         const limit = document.getElementById("data-limit").value;
         const sensorType = document.getElementById("data-type").value;
-
-        fetch(`http://127.0.0.1:8000/api/data/export_to_csv`)
-            .then(response => response.json())
-            .then(({ data }) => {
-                let csvContent = "Timestamp,Value\n";
-                data.forEach(entry => {
-                    csvContent += `${entry.timestamp},${entry.value}\n`;
-                });
-
-                const blob = new Blob([csvContent], { type: "text/csv" });
+    
+        fetch(`http://localhost:5007/api/data/export_to_csv?limit=${limit}&type=${sensorType}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
                 const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = `${sensorType}_data.csv`;
+                link.setAttribute("href", url);
+                link.setAttribute("download", `sensor_data_${sensorType}_${limit}_records.csv`);
+                document.body.appendChild(link);
                 link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error("Error downloading CSV:", error);
             });
     }
+    
     document.getElementById('data-type').addEventListener('change', function () {
         getMinMaxAvg();
     });
