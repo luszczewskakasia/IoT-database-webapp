@@ -5,7 +5,7 @@ import psycopg2
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy() 
-engine = create_engine("postgresql://postgres:postgres@sensor_db/postgres", echo=True)
+engine = create_engine("postgresql://postgres:postgres@sensor-db-postgresql/postgres", echo=True)
 
 class SensorData(db.Model):
     __tablename__ = 'sensor_data'

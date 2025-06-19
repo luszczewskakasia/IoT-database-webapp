@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: display-graph
-        image: 192.168.0.103:8000/display_graph
+        image: 192.168.100.15:8000/display_graph
         ports:
         - containerPort: 5002
 ---

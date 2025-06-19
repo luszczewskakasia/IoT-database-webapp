@@ -10,14 +10,22 @@ app = Flask(__name__)
 CORS(app)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@sensor_db:5432/postgres"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@sensor-db-postgresql:5432/postgres"
 # db = SQLAlchemy(app)
 db.init_app(app)
 
 def wait_for_rabbitmq(host='rabbitmq'):
+    credentials = pika.PlainCredentials('guest', 'guest')
+    parameters = pika.ConnectionParameters(
+        host=host,
+        port=5672,
+        virtual_host='/',
+        credentials=credentials
+    )
     for i in range(10):
         try:
-            conn = pika.BlockingConnection(pika.ConnectionParameters(host=host))
+            conn = pika.BlockingConnection(parameters)
+            # conn = pika.BlockingConnection(pika.ConnectionParameters(host=host))
             return conn
         except pika.exceptions.AMQPConnectionError as e:
             time.sleep(5)

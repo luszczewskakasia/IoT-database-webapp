@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: get-values
-        image: 192.168.0.103:8000/get_min_max_avg
+        image: 192.168.100.15:8000/get_min_max_avg
         ports:
         - containerPort: 5004
 ---

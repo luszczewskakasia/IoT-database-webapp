@@ -3,7 +3,7 @@ from flask import request
 from flask_cors import CORS
 from database import SensorData, db
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@sensor_db/postgres"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@sensor-db-postgresql/postgres"
 
 db.init_app(app)
 CORS(app)

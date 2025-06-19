@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: consumer
-        image: 192.168.0.103:8000/consumer:0.0.1
+        image: 192.168.100.15:8000/consumer
         ports:
         - containerPort: 5001
         env: 
