@@ -3,7 +3,7 @@
 # FROM ghcr.io/carlosperate/qemu-rpi-vm:2024-01-03
 # FROM ghcr.io/carlosperate/qemu-rpi-os-lite:bullseye-2023-05-03
 FROM --platform=linux/arm64 ghcr.io/dtcooper/raspberrypi-os:python3.12-bookworm
-
+ARG SENSOR_NUMBER
 COPY requirements.txt .
 RUN apt update && apt install -y \
     bash \

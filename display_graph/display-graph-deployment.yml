@@ -16,7 +16,7 @@ spec:
       - name: display-graph
         image: 192.168.100.15:8000/display_graph
         ports:
-        - containerPort: 5002
+        - containerPort: 5000
 ---
 apiVersion: v1
 kind: Service

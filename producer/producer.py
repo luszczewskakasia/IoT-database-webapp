@@ -22,18 +22,21 @@ def wait_for_rabbitmq(host='rabbitmq'):
             time.sleep(5)
 
 while True:
-    # TODO: to change to the correct port
     connection = wait_for_rabbitmq()
     channel = connection.channel()
     channel.queue_declare(queue='sensor_data')
     try:
-        r = requests.get('http://192.168.100.15:7001/XD')
-        print(r.json())
-        message = r.text
-        channel.basic_publish(exchange='',routing_key='sensor_data', body=message)
-        logging.info(f"Sent message: {message}")
-        # print(f"new sensor data: {message}")
-        # connection.close()
+        for port in range(7001, 7011):  # Iterate through ports 7001 to 7010
+            url = f'http://192.168.100.15:{port}/XD'
+            try:
+                r = requests.get(url)
+                if r.status_code == 200:  # Check if the request was successful
+                    print(r.json())
+                    message = r.text
+                    channel.basic_publish(exchange='', routing_key='sensor_data', body=message)
+                    logging.info(f"Sent message from port {port}: {message}")
+            except requests.exceptions.RequestException as req_err:
+                logging.error(f"Error connecting to {url}: {req_err}")
         time.sleep(10)
     except Exception as e:
         logging.error(f"Error connecting to RabbitMQ: {e}")
