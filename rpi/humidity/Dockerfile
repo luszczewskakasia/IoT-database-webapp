@@ -1,14 +1,12 @@
-
-# FROM balenalib/raspberry-pi-debian-python:latest
-# FROM ghcr.io/carlosperate/qemu-rpi-vm:2024-01-03
-# FROM ghcr.io/carlosperate/qemu-rpi-os-lite:bullseye-2023-05-03
 FROM --platform=linux/arm64 ghcr.io/dtcooper/raspberrypi-os:python3.12-bookworm
 ARG SENSOR_NUMBER
 COPY requirements.txt .
-RUN apt update && apt install -y \
-    bash \
+RUN apt update && apt install -y --no-install-recommends \
+    python3-minimal \
+    python3-dev \
     python3 \
     python3-pip \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install -r requirements.txt
