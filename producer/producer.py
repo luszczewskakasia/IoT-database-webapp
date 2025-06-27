@@ -26,11 +26,11 @@ while True:
     channel = connection.channel()
     channel.queue_declare(queue='sensor_data')
     try:
-        for port in range(7001, 7011):  # Iterate through ports 7001 to 7010
+        for port in range(7001, 7011):
             url = f'http://192.168.100.15:{port}/XD'
             try:
                 r = requests.get(url)
-                if r.status_code == 200:  # Check if the request was successful
+                if r.status_code == 200:
                     print(r.json())
                     message = r.text
                     channel.basic_publish(exchange='', routing_key='sensor_data', body=message)
