@@ -1,15 +1,16 @@
 #!/bin/bash
 
-START_FILE="start_10.csv"
-DEPLOYMENT_FILE="deployment_10.csv"
-END_FILE="end_10.csv"
-DELETE_FILE="delete_10.csv"
+START_FILE="start_11.csv"
+DEPLOYMENT_FILE="deployment_11.csv"
+END_FILE="end_11.csv"
+DELETE_FILE="delete_11.csv"
 INTERVAL=5
 MAX_TIME_START=60
 MAX_TIME_DEPLOY=120
 MAX_TIME_END=60
 MAX_TIME_DELETE=60
 
+# sudo -S <<< "passowrd" command
 echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$START_FILE"
 echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$DEPLOYMENT_FILE"
 echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$END_FILE"
@@ -54,26 +55,29 @@ collect_metrics() {
 trap "echo -e '\n[INFO] Stopping resource monitor.'; exit 0" SIGINT
 
 # 1. Monitor minikube start
-collect_metrics "$MAX_TIME_START" "$START_FILE" "minikube start" 10
+collect_metrics "$MAX_TIME_START" "$START_FILE" "curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" INSTALL_K3S_EXEC="server" sh -s - --node-name k3s-master" 10
+sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
+sudo chown $USER:$USER ~/.kube/config
 echo "Start deployment"
 # 2. Monitor deployments
 DEPLOY_COMMANDS="
-minikube kubectl -- apply -f server/server-deployment.yml
-minikube kubectl -- apply -f consumer/consumer-deployment.yml
-minikube kubectl -- apply -f producer/producer-deployment.yml
-minikube kubectl -- apply -f export_to_csv/export-csv-deployment.yml
-minikube kubectl -- apply -f display_graph/display-graph-deployment.yml
-minikube kubectl -- apply -f get_min_max_avg/get-values-deployment.yml
-helm install sensor-db-postgresql bitnami/postgresql --set auth.postgresPassword=postgres --set volumePermissions.enabled=true
+kubectl apply -f server/server-deployment.yml
+kubectl apply -f consumer/consumer-deployment.yml
+kubectl apply -f producer/producer-deployment.yml
+kubectl apply -f export_to_csv/export-csv-deployment.yml
+kubectl apply -f display_graph/display-graph-deployment.yml
+kubectl apply -f get_min_max_avg/get-values-deployment.yml
+sleep 2
+helm install sensor-db-postgresql bitnami/postgresql --version 16.7.14 --set auth.postgresPassword=postgres --set volumePermissions.enabled=true
 helm install rabbitmq bitnami/rabbitmq --set auth.username=guest --set auth.password=guest --set auth.forcePassword=true --set rabbitmq.extraConfiguration='loopback_users = none'
 "
 collect_metrics "$MAX_TIME_DEPLOY" "$DEPLOYMENT_FILE" "$DEPLOY_COMMANDS" 10
 
 echo "Stop"
-collect_metrics "$MAX_TIME_END" "$END_FILE" "minikube stop" 10
+collect_metrics "$MAX_TIME_END" "$END_FILE" "sudo systemctl stop k3s" 10
 
 echo "Delete"
-collect_metrics "$MAX_TIME_DELETE" "$DELETE_FILE" "minikube delete" 10
+collect_metrics "$MAX_TIME_DELETE" "$DELETE_FILE" "sudo /usr/local/bin/k3s-uninstall.sh" 10
 
 echo "[INFO] All metrics collected successfully."
 

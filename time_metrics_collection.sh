@@ -12,19 +12,21 @@ measure_times() {
     # Measure minikube start time
     echo "[INFO] Measuring minikube start time - iteration $iteration"
     start_time=$(date +%s.%N)
-    minikube start
+    curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" INSTALL_K3S_EXEC="server" sh -s - --node-name k3s-master
+    sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
+    sudo chown $USER:$USER ~/.kube/config
     end_time=$(date +%s.%N)
     start_duration=$(echo "$end_time - $start_time" | bc)
 
     # Measure deployment time
     echo "[INFO] Measuring deployment time - iteration $iteration"
     start_time=$(date +%s.%N)
-    minikube kubectl -- apply -f server/server-deployment.yml
-    minikube kubectl -- apply -f consumer/consumer-deployment.yml
-    minikube kubectl -- apply -f producer/producer-deployment.yml
-    minikube kubectl -- apply -f export_to_csv/export-csv-deployment.yml
-    minikube kubectl -- apply -f display_graph/display-graph-deployment.yml
-    minikube kubectl -- apply -f get_min_max_avg/get-values-deployment.yml
+    kubectl apply -f server/server-deployment.yml
+    kubectl apply -f consumer/consumer-deployment.yml
+    kubectl apply -f producer/producer-deployment.yml
+    kubectl apply -f export_to_csv/export-csv-deployment.yml
+    kubectl apply -f display_graph/display-graph-deployment.yml
+    kubectl apply -f get_min_max_avg/get-values-deployment.yml
     helm install sensor-db-postgresql bitnami/postgresql --set auth.postgresPassword=postgres --set volumePermissions.enabled=true
     helm install rabbitmq bitnami/rabbitmq --set auth.username=guest --set auth.password=guest --set auth.forcePassword=true --set rabbitmq.extraConfiguration='loopback_users = none'
     end_time=$(date +%s.%N)
@@ -33,14 +35,14 @@ measure_times() {
     # Measure minikube stop time
     echo "[INFO] Measuring minikube stop time - iteration $iteration"
     start_time=$(date +%s.%N)
-    minikube stop
+    sudo systemctl stop k3s
     end_time=$(date +%s.%N)
     stop_duration=$(echo "$end_time - $start_time" | bc)
 
     # Measure minikube delete time
     echo "[INFO] Measuring minikube delete time - iteration $iteration"
     start_time=$(date +%s.%N)
-    minikube delete
+    sudo /usr/local/bin/k3s-uninstall.sh
     end_time=$(date +%s.%N)
     delete_duration=$(echo "$end_time - $start_time" | bc)
 

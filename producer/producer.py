@@ -26,7 +26,7 @@ while True:
     channel = connection.channel()
     channel.queue_declare(queue='sensor_data')
     try:
-        for port in range(7001, 7011):
+        for port in range(7001, 7021):
             url = f'http://192.168.100.15:{port}/XD'
             try:
                 r = requests.get(url)
