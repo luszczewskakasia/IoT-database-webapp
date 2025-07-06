@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-get-min-max
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /api/data/min_max
+            pathType: Prefix
+            backend:
+              service:
+                name: get-values-service
+                port:
+                  number: 5000

@@ -1,19 +1,12 @@
 #!/bin/bash
 
-START_FILE="start_10.csv"
-DEPLOYMENT_FILE="deployment_10.csv"
-END_FILE="end_10.csv"
-DELETE_FILE="delete_10.csv"
+NUM_ITERATIONS=10
+
 INTERVAL=5
 MAX_TIME_START=60
-MAX_TIME_DEPLOY=120
+MAX_TIME_DEPLOY=300
 MAX_TIME_END=60
 MAX_TIME_DELETE=60
-
-echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$START_FILE"
-echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$DEPLOYMENT_FILE"
-echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$END_FILE"
-echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$DELETE_FILE"
 
 echo "[INFO] Monitoring system resources every $INTERVAL seconds..."
 
@@ -53,31 +46,60 @@ collect_metrics() {
 
 trap "echo -e '\n[INFO] Stopping resource monitor.'; exit 0" SIGINT
 
-# 1. Monitor minikube start
-collect_metrics "$MAX_TIME_START" "$START_FILE" "minikube start" 10
-echo "Start deployment"
-# 2. Monitor deployments
-DEPLOY_COMMANDS="
-minikube kubectl -- apply -f server/server-deployment.yml
-minikube kubectl -- apply -f consumer/consumer-deployment.yml
-minikube kubectl -- apply -f producer/producer-deployment.yml
-minikube kubectl -- apply -f export_to_csv/export-csv-deployment.yml
-minikube kubectl -- apply -f display_graph/display-graph-deployment.yml
-minikube kubectl -- apply -f get_min_max_avg/get-values-deployment.yml
-helm install sensor-db-postgresql bitnami/postgresql --set auth.postgresPassword=postgres --set volumePermissions.enabled=true
-helm install rabbitmq bitnami/rabbitmq --set auth.username=guest --set auth.password=guest --set auth.forcePassword=true --set rabbitmq.extraConfiguration='loopback_users = none'
-"
-collect_metrics "$MAX_TIME_DEPLOY" "$DEPLOYMENT_FILE" "$DEPLOY_COMMANDS" 10
 
-echo "Stop"
-collect_metrics "$MAX_TIME_END" "$END_FILE" "minikube stop" 10
 
-echo "Delete"
-collect_metrics "$MAX_TIME_DELETE" "$DELETE_FILE" "minikube delete" 10
+
+for i in $(seq 1 $NUM_ITERATIONS); do
+    START_FILE="start_1$i.csv"
+    DEPLOYMENT_FILE="deployment_1$i.csv"
+    END_FILE="end_1$i.csv"
+    DELETE_FILE="delete_1$i.csv"
+    echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$START_FILE"
+    echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$DEPLOYMENT_FILE"
+    echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$END_FILE"
+    echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$DELETE_FILE"
+    echo "[INFO] Starting iteration $i of $NUM_ITERATIONS"
+    # 1. Monitor minikube start
+    collect_metrics "$MAX_TIME_START" "$START_FILE" "minikube start --insecure-registry="192.168.100.15:8000" " 10
+    echo "Start deployment"
+    # 2. Monitor deployments
+    DEPLOY_COMMANDS='
+        helm install sensor-db-postgresql bitnami/postgresql --set auth.postgresPassword=postgres --set volumePermissions.enabled=true && \
+        helm install rabbitmq bitnami/rabbitmq --set auth.username=guest --set auth.password=guest --set auth.forcePassword=true --set rabbitmq.extraConfiguration="loopback_users = none" && \
+        helm install ingress ingress-nginx/ingress-nginx --set controller.service.nodePorts.http=31145 && \
+        minikube kubectl -- apply -f server/server-deployment.yml && \
+        minikube kubectl -- apply -f consumer/consumer-deployment.yml && \
+        minikube kubectl -- apply -f producer/producer-deployment.yml && \
+        minikube kubectl -- apply -f export_to_csv/export-csv-deployment.yml && \
+        minikube kubectl -- apply -f display_graph/display-graph-deployment.yml && \
+        minikube kubectl -- apply -f get_min_max_avg/get-values-deployment.yml && \
+        iter=1 && \
+        until minikube kubectl -- wait --for=condition=Ready pod -l app.kubernetes.io/instance=ingress --timeout=5s; do
+            echo "[INFO] Waiting for ingress to be ready - iteration $iter"
+            sleep 5
+            ((iter++))
+        done && \
+        minikube kubectl -- apply -f server/ingress.yml && \
+        minikube kubectl -- apply -f export_to_csv/ingress.yml && \
+        minikube kubectl -- apply -f display_graph/ingress.yml && \
+        minikube kubectl -- apply -f get_min_max_avg/ingress.yml && \
+        until minikube kubectl -- wait --for=condition=Ready pod --all --timeout=5s && minikube kubectl -- wait --for=jsonpath="{.status.phase}"=Running pod --all --timeout=5s; do
+            echo "[INFO] Waiting for all pods to be ready - iteration $iter"
+            sleep 5
+            ((iter++))
+        done'
+
+    collect_metrics "$MAX_TIME_DEPLOY" "$DEPLOYMENT_FILE" "$DEPLOY_COMMANDS" 10
+
+    echo "Stop"
+    collect_metrics "$MAX_TIME_END" "$END_FILE" "minikube stop" 10
+
+    echo "Delete"
+    collect_metrics "$MAX_TIME_DELETE" "$DELETE_FILE" "minikube delete" 10
+    echo "[INFO] Completed iteration $i"
+done
 
 echo "[INFO] All metrics collected successfully."
-
-
 
     # start=curr_time
     # kubectl apply -f server/server-deployment.yml

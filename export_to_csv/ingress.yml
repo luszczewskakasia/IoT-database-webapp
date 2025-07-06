@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-export-csv
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /api/data/export_to_csv
+            pathType: Prefix
+            backend:
+              service:
+                name: export-csv-service
+                port:
+                  number: 5000
