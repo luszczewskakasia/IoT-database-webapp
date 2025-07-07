@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let myChart;
 
     async function fetchData(limit, sensorType) {
-    const response = await fetch(`http://localhost:39057/api/data?limit=${limit}&type=${sensorType}`);
+    const response = await fetch(`http://192.168.100.15:31145/api/data?limit=${limit}&type=${sensorType}`);
     const data = await response.json();
     console.log(data)
     return {
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
     async function getMinMaxAvg() {
         const limit = document.getElementById("data-limit").value;
         const sensorType = document.getElementById("data-type").value;
-        const response = await fetch(`http://localhost:43563/api/data/min_max?limit=${limit}&type=${sensorType}`);
+        const response = await fetch(`http://192.168.100.15:31145/api/data/min_max?limit=${limit}&type=${sensorType}`);
         const data = await response.json();
         document.getElementById("min-value").textContent = `Min value: ${data.min}`;
         document.getElementById("max-value").textContent = `Max value: ${data.max}`;
@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const limit = document.getElementById("data-limit").value;
         const sensorType = document.getElementById("data-type").value;
     
-        fetch(`http://localhost:45219//api/data/export_to_csv?limit=${limit}&type=${sensorType}`)
+        fetch(`http://192.168.100.15:31145//api/data/export_to_csv?limit=${limit}&type=${sensorType}`)
             .then(response => {
                 if (!response.ok) throw new Error('Network response was not ok');
                 return response.blob();

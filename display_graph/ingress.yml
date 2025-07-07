@@ -1,0 +1,31 @@
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: ingress-display-graph
+# spec:
+#   ingressClassName: nginx
+#   rules:
+#   - http:
+#       paths:
+#       - path: /api/data
+#         backend:
+#           serviceName: display-graph-service
+#           servicePort: 5000
+# ---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-display-graph
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /api/data
+            pathType: Prefix
+            backend:
+              service:
+                name: display-graph-service
+                port:
+                  number: 5000
