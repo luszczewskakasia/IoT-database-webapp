@@ -8,8 +8,6 @@ MAX_TIME_DEPLOY=300
 MAX_TIME_END=60
 MAX_TIME_DELETE=60
 
-echo "[INFO] Monitoring system resources every $INTERVAL seconds..."
-
 collect_metrics() {
     local duration=$1
     local output_file=$2
@@ -22,7 +20,7 @@ collect_metrics() {
         timestamp="${SECONDS_ELAPSED}s"
 
         if [ $SECONDS_ELAPSED -eq $delay_trigger ] && [ "$trigger_done" = false ]; then
-            echo "[INFO] Executing triggered action at $SECONDS_ELAPSED seconds..."
+            # echo "[INFO] Executing triggered action at $SECONDS_ELAPSED seconds..."
             eval "$start_action" &
             trigger_done=true
         fi
@@ -44,25 +42,23 @@ collect_metrics() {
     done
 }
 
-trap "echo -e '\n[INFO] Stopping resource monitor.'; exit 0" SIGINT
+trap "echo -e '\n stop'; exit 0" SIGINT
 
 
 
 
 for i in $(seq 1 $NUM_ITERATIONS); do
-    START_FILE="start_1$i.csv"
-    DEPLOYMENT_FILE="deployment_1$i.csv"
-    END_FILE="end_1$i.csv"
-    DELETE_FILE="delete_1$i.csv"
+    START_FILE="start_$i.csv"
+    DEPLOYMENT_FILE="deployment_$i.csv"
+    END_FILE="end_$i.csv"
+    DELETE_FILE="delete_$i.csv"
     echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$START_FILE"
     echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$DEPLOYMENT_FILE"
     echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$END_FILE"
     echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$DELETE_FILE"
-    echo "[INFO] Starting iteration $i of $NUM_ITERATIONS"
-    # 1. Monitor minikube start
+    echo "iteration $i"
     collect_metrics "$MAX_TIME_START" "$START_FILE" "minikube start --insecure-registry="192.168.100.15:8000" " 10
     echo "Start deployment"
-    # 2. Monitor deployments
     DEPLOY_COMMANDS='
         helm install sensor-db-postgresql bitnami/postgresql --set auth.postgresPassword=postgres --set volumePermissions.enabled=true && \
         helm install rabbitmq bitnami/rabbitmq --set auth.username=guest --set auth.password=guest --set auth.forcePassword=true --set rabbitmq.extraConfiguration="loopback_users = none" && \
@@ -96,10 +92,10 @@ for i in $(seq 1 $NUM_ITERATIONS); do
 
     echo "Delete"
     collect_metrics "$MAX_TIME_DELETE" "$DELETE_FILE" "minikube delete" 10
-    echo "[INFO] Completed iteration $i"
+    echo "Completed iteration $i"
 done
 
-echo "[INFO] All metrics collected successfully."
+echo "done"
 
     # start=curr_time
     # kubectl apply -f server/server-deployment.yml

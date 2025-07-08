@@ -2,7 +2,7 @@ timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write
 0s,4.0,19.5,33.5,0,24
 5s,3.1,19.5,26.2,0,4090
 10s,27.7,19.6,1.90,0,108
-15s,3.0,19.5,0,0,0
+15s,3.0,19.5,3.2,0,24
 20s,3.0,19.4,13.7,0,40
 25s,3.0,19.5,0.40,0,36
 30s,2.0,19.5,33.4,0,28
@@ -11,4 +11,4 @@ timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write
 45s,3.0,19.4,83.4,0,24
 50s,27.7,19.5,39.2,0,140
 55s,3.0,19.5,83.5,0,68
-60s,9.9,19.5,0,0,0
+60s,9.9,19.5,31.1,0,26
