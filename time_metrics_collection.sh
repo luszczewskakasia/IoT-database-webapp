@@ -1,24 +1,24 @@
 #!/bin/bash
 
 OUTPUT_FILE="time.csv"
-NUM_ITERATIONS=1
+NUM_ITERATIONS=10
 
-echo "iteration,start_time,deployment_time,stop_time,delete_time" > "$OUTPUT_FILE"
+# echo "iteration,start_time,deployment_time,stop_time,delete_time" > "$OUTPUT_FILE"
 
 measure_times() {
     local iteration=$1
     ### EXEC WAS CHANGED -> https://medium.com/@alesson.viana/installing-the-nginx-ingress-controller-on-k3s-df2c68cae3c8
     # EARLIER WAS INSTALL_K3S_EXEC="--disable servicelb, traefik"
-    curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" INSTALL_K3S_EXEC="server - no-deploy traefik" sh -s - --node-name k3s-master
+    # curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" INSTALL_K3S_EXEC="--disable traefik" sh -s - --node-name k3s-master --selinux
+    start_time=$(date +%s.%N)
+    curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" INSTALL_K3S_EXEC="server --disable traefik" sh -s - --node-name k3s-master --selinux
+    end_time=$(date +%s.%N)
+    start_duration=$(echo "$end_time - $start_time" | bc)
     sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
     sudo chown $USER:$USER ~/.kube/config  
     cat mirror.sh | sudo tee /etc/rancher/k3s/registries.yaml
     sudo systemctl restart k3s
     echo "start time - iteration $iteration"
-    start_time=$(date +%s.%N)
-    sudo systemctl start k3s
-    end_time=$(date +%s.%N)
-    start_duration=$(echo "$end_time - $start_time" | bc)
 
     echo "[INFO] Measuring deployment time - iteration $iteration"
     start_time=$(date +%s.%N)
@@ -54,26 +54,26 @@ measure_times() {
     kubectl get pods
     deploy_duration=$(echo "$end_time - $start_time" | bc)
 
-    # echo "[INFO] Measuring stop time - iteration $iteration"
-    # start_time=$(date +%s.%N)
-    # sudo systemctl stop k3s
-    # end_time=$(date +%s.%N)
-    # stop_duration=$(echo "$end_time - $start_time" | bc)
+    echo "[INFO] Measuring stop time - iteration $iteration"
+    start_time=$(date +%s.%N)
+    sudo systemctl stop k3s
+    end_time=$(date +%s.%N)
+    stop_duration=$(echo "$end_time - $start_time" | bc)
 
-    # echo "[INFO] Measuring delete time - iteration $iteration"
-    # start_time=$(date +%s.%N)
-    # sudo /usr/local/bin/k3s-uninstall.sh
-    # end_time=$(date +%s.%N)
-    # delete_duration=$(echo "$end_time - $start_time" | bc)
+    echo "[INFO] Measuring delete time - iteration $iteration"
+    start_time=$(date +%s.%N)
+    sudo /usr/local/bin/k3s-uninstall.sh
+    end_time=$(date +%s.%N)
+    delete_duration=$(echo "$end_time - $start_time" | bc)
 
     echo "$iteration,$start_duration,$deploy_duration,$stop_duration,$delete_duration" >> "$OUTPUT_FILE"
 }
 
-# for i in $(seq 1 $NUM_ITERATIONS); do
-#     echo "[INFO] Starting iteration $i of $NUM_ITERATIONS"
-#     measure_times $i
-#     echo "[INFO] Completed iteration $i"
-# done
-measure_times 1
+for i in $(seq 7 $NUM_ITERATIONS); do
+    echo "[INFO] Starting iteration $i of $NUM_ITERATIONS"
+    measure_times $i
+    echo "[INFO] Completed iteration $i"
+done
+# measure_times 1
 
 echo "[INFO] All measurements completed. Results saved in $OUTPUT_FILE"

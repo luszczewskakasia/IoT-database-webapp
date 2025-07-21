@@ -15,8 +15,7 @@ def wait_for_rabbitmq(host='rabbitmq'):
     )
     for i in range(10):
         try:
-            conn = pika.BlockingConnection(parameters) # z chatu
-            # conn = pika.BlockingConnection(pika.ConnectionParameters(host=host))
+            conn = pika.BlockingConnection(parameters)
             return conn
         except pika.exceptions.AMQPConnectionError as e:
             time.sleep(5)
@@ -26,7 +25,7 @@ while True:
     channel = connection.channel()
     channel.queue_declare(queue='sensor_data')
     try:
-        for port in range(7001, 7021):
+        for port in range(7001, 7011):
             url = f'http://192.168.100.15:{port}/XD'
             try:
                 r = requests.get(url)

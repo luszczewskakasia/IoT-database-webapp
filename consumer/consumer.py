@@ -46,7 +46,7 @@ def data_added(ch, method, properties, body):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            print(f"Database error: {e}")
+            print(f"error: {e}")
             
 connection = wait_for_rabbitmq()
 

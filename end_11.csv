@@ -1,6 +1,0 @@
-timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk
-0s,9.4,28.6,13.5,0,475
-5s,5.8,28.5,22.9,0,180
-10s,40.9,27.1,42.2,0,24
-15s,7.4,27.2,0.20,0,8183
-20s,5.6,27.3,20.8,0,128
