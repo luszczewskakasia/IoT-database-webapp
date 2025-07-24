@@ -12,6 +12,7 @@ class TrafficLoad(HttpUser):
     def get_sensor_data(self):
         # Test different sensor types
         sensor_types = ["Humidity", "Pressure", "Temperature"]
+        # sensor_types = ["Temperature"]
         limits = [20, 50, 100]
         
         for sensor_type in sensor_types:
@@ -22,6 +23,7 @@ class TrafficLoad(HttpUser):
     def get_min_max_data(self):
         # Test min/max endpoint with different parameters
         sensor_types = ["Humidity", "Pressure", "Temperature"]
+        # sensor_types = ["Temperature"]
         limits = [20, 50, 100]
         
         for sensor_type in sensor_types:
@@ -32,6 +34,7 @@ class TrafficLoad(HttpUser):
     def export_csv_data(self):
         # Test CSV export with different parameters
         sensor_types = ["Humidity", "Pressure", "Temperature"]
+        # sensor_types = ["Temperature"]
         limits = [20, 50, 100]
         
         for sensor_type in sensor_types:

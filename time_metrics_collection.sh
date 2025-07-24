@@ -1,7 +1,7 @@
 #!/bin/bash
 
-OUTPUT_FILE="time.csv"
-NUM_ITERATIONS=10
+OUTPUT_FILE="time_test.csv"
+NUM_ITERATIONS=1
 
 echo "iteration,start_time,deployment_time,stop_time,delete_time" > "$OUTPUT_FILE"
 
@@ -48,25 +48,27 @@ measure_times() {
     minikube kubectl -- get pods
     deploy_duration=$(echo "$end_time - $start_time" | bc)
 
-    echo "[INFO] Measuring minikube stop time - iteration $iteration"
-    start_time=$(date +%s.%N)
-    minikube stop
-    end_time=$(date +%s.%N)
-    stop_duration=$(echo "$end_time - $start_time" | bc)
+    # echo "[INFO] Measuring minikube stop time - iteration $iteration"
+    # start_time=$(date +%s.%N)
+    # minikube stop
+    # end_time=$(date +%s.%N)
+    # stop_duration=$(echo "$end_time - $start_time" | bc)
 
-    echo "[INFO] Measuring minikube delete time - iteration $iteration"
-    start_time=$(date +%s.%N)
-    minikube delete
-    end_time=$(date +%s.%N)
-    delete_duration=$(echo "$end_time - $start_time" | bc)
+    # echo "[INFO] Measuring minikube delete time - iteration $iteration"
+    # start_time=$(date +%s.%N)
+    # minikube delete
+    # end_time=$(date +%s.%N)
+    # delete_duration=$(echo "$end_time - $start_time" | bc)
 
     echo "$iteration,$start_duration,$deploy_duration,$stop_duration,$delete_duration" >> "$OUTPUT_FILE"
 }
 
-for i in $(seq 1 $NUM_ITERATIONS); do
-    echo "[INFO] Starting iteration $i of $NUM_ITERATIONS"
-    measure_times $i
-    echo "[INFO] Completed iteration $i"
-done
+# for i in $(seq 1 $NUM_ITERATIONS); do
+#     echo "[INFO] Starting iteration $i of $NUM_ITERATIONS"
+#     measure_times $i
+#     echo "[INFO] Completed iteration $i"
+# done
+
+measure_times 1
 
 echo "[INFO] All measurements completed. Results saved in $OUTPUT_FILE"
