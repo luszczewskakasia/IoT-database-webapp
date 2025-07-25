@@ -1,1 +1,2 @@
 timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk
+0s,6.6,14.0,0,0,0
