@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NUM_ITERATIONS=2
+NUM_ITERATIONS=5
 
 INTERVAL=5
 MAX_TIME_START=60
@@ -47,7 +47,7 @@ trap "echo -e '\n stop'; exit 0" SIGINT
 
 
 
-for i in $(seq 1 $NUM_ITERATIONS); do
+for i in $(seq 5 $NUM_ITERATIONS); do
     START_FILE="start_$i.csv"
     DEPLOYMENT_FILE="deployment_$i.csv"
     END_FILE="end_$i.csv"
