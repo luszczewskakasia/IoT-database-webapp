@@ -6,7 +6,7 @@ INTERVAL=5
 MAX_TIME_START=60
 MAX_TIME_DEPLOY=300
 MAX_TIME_END=60
-MAX_TIME_DELETE=60
+MAX_TIME_DELETE=70
 
 collect_metrics() {
     local duration=$1
@@ -47,7 +47,7 @@ trap "echo -e '\n stop'; exit 0" SIGINT
 
 
 
-for i in $(seq 5 $NUM_ITERATIONS); do
+for i in $(seq 1 $NUM_ITERATIONS); do
     START_FILE="start_$i.csv"
     DEPLOYMENT_FILE="deployment_$i.csv"
     END_FILE="end_$i.csv"
@@ -57,49 +57,52 @@ for i in $(seq 5 $NUM_ITERATIONS); do
     echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$END_FILE"
     echo "timestamp,cpu_usage_percent,mem_usage_percent,disk_usage_percent,read_disk,write_disk" > "$DELETE_FILE"
     echo "iteration $i"
-    collect_metrics "$MAX_TIME_START" "$START_FILE" "curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE='644' INSTALL_K3S_EXEC='server --disable traefik' sh -s - --node-name k3s-master" 10
-    sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
-    sudo chown $USER:$USER ~/.kube/config  
-    cat mirror.sh | sudo tee /etc/rancher/k3s/registries.yaml
-    sudo systemctl restart k3s
+    collect_metrics "$MAX_TIME_START" "$START_FILE" "sudo snap install microk8s --classic --channel=1.32" 10
+    sudo mkdir -p /var/snap/microk8s/current/args/certs.d/192.168.100.15:8000
+    sudo touch /var/snap/microk8s/current/args/certs.d/192.168.100.15:8000/hosts.toml
+    cat mirror.sh | sudo tee /var/snap/microk8s/current/args/certs.d/192.168.100.15:8000/hosts.toml
+    microk8s enable dns
+    microk8s enable hostpath-storage
+    microk8s stop
+    microk8s start
+    # microk8s enable hostpath-storage
     echo "Start deployment"
     DEPLOY_COMMANDS="
-    helm install sensor-db-postgresql bitnami/postgresql --set auth.postgresPassword=postgres --set volumePermissions.enabled=true --version 16.7.14
-    helm install rabbitmq bitnami/rabbitmq --set auth.username=guest --set auth.password=guest --set auth.forcePassword=true --set rabbitmq.extraConfiguration='loopback_users = none'
-    helm install ingress ingress-nginx/ingress-nginx --set controller.service.nodePorts.http=31145
-    kubectl apply -f server/server-deployment.yml
-    kubectl apply -f consumer/consumer-deployment.yml
-    kubectl apply -f producer/producer-deployment.yml
-    kubectl apply -f export_to_csv/export-csv-deployment.yml
-    kubectl apply -f display_graph/display-graph-deployment.yml
-    kubectl apply -f get_min_max_avg/get-values-deployment.yml
-    # kubectl wait --for=jsonpath='{.status.phase}=Running pod -l app.kubernetes.io/instance=ingress
+    microk8s helm3 install sensor-db-postgresql bitnami/postgresql --set auth.postgresPassword=postgres --set volumePermissions.enabled=true --version 16.7.14
+    microk8s helm3 install rabbitmq bitnami/rabbitmq --set auth.username=guest --set auth.password=guest --set auth.forcePassword=true --set rabbitmq.extraConfiguration='loopback_users = none'
+    microk8s helm3 install ingress ingress-nginx/ingress-nginx --set controller.service.nodePorts.http=31145
+    microk8s kubectl apply -f server/server-deployment.yml
+    microk8s kubectl apply -f consumer/consumer-deployment.yml
+    microk8s kubectl apply -f producer/producer-deployment.yml
+    microk8s kubectl apply -f export_to_csv/export-csv-deployment.yml
+    microk8s kubectl apply -f display_graph/display-graph-deployment.yml
+    microk8s kubectl apply -f get_min_max_avg/get-values-deployment.yml
     iter=1
-    until kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=ingress --timeout=5s; do
+    until microk8s kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=ingress --timeout=5s; do
         echo '[INFO] Waiting for ingress to be ready - iteration $iter'
         sleep 5
         ((iter++))
     done
     sleep 5
 
-    kubectl apply -f server/ingress.yml
-    kubectl apply -f export_to_csv/ingress.yml
-    kubectl apply -f display_graph/ingress.yml
-    kubectl apply -f get_min_max_avg/ingress.yml
-    until kubectl wait --for=condition=Ready pod --all --timeout=5s && kubectl wait --for=jsonpath='{.status.phase}'=Running pod --all --timeout=5s; do
+    microk8s kubectl apply -f server/ingress.yml
+    microk8s kubectl apply -f export_to_csv/ingress.yml
+    microk8s kubectl apply -f display_graph/ingress.yml
+    microk8s kubectl apply -f get_min_max_avg/ingress.yml
+    until microk8s kubectl wait --for=condition=Ready pod --all --timeout=5s && microk8s kubectl wait --for=jsonpath='{.status.phase}'=Running pod --all --timeout=5s; do
         echo '[INFO] Waiting for ingress to be ready - iteration $iter'
         sleep 5
         ((iter++))
     done"
 
     collect_metrics "$MAX_TIME_DEPLOY" "$DEPLOYMENT_FILE" "$DEPLOY_COMMANDS" 10
-    kubectl get pods
+    microk8s kubectl get pods
 
     echo "Stop"
-    collect_metrics "$MAX_TIME_END" "$END_FILE" "sudo systemctl stop k3s" 10
+    collect_metrics "$MAX_TIME_END" "$END_FILE" "microk8s stop" 10
 
     echo "Delete"
-    collect_metrics "$MAX_TIME_DELETE" "$DELETE_FILE" "sudo /usr/local/bin/k3s-uninstall.sh" 10
+    collect_metrics "$MAX_TIME_DELETE" "$DELETE_FILE" "sudo snap remove microk8s" 10
     echo "Completed iteration $i"
 done
 
