@@ -20,8 +20,7 @@ collect_metrics() {
         timestamp="${SECONDS_ELAPSED}s"
 
         if [ $SECONDS_ELAPSED -eq $delay_trigger ] && [ "$trigger_done" = false ]; then
-            # echo "[INFO] Executing triggered action at $SECONDS_ELAPSED seconds..."
-            eval "$start_action" &
+            eval "$start_action"
             trigger_done=true
         fi
 
@@ -107,16 +106,3 @@ for i in $(seq 6 $NUM_ITERATIONS); do
 done
 
 echo "done"
-
-    # start=curr_time
-    # kubectl apply -f server/server-deployment.yml
-    # kubectl apply -f consumer/consumer-deployment.yml
-    # kubectl apply -f producer/producer-deployment.yml
-    # kubectl apply -f export_to_csv/export-csv-deployment.yml
-    # kubectl apply -f display_graph/display-graph-deployment.yml
-    # kubectl apply -f get_min_max_avg/get-values-deployment.yml
-    # helm install sensor-db-postgresql bitnami/postgresql --set auth.postgresPassword=postgres --set volumePermissions.enabled=true
-    # helm install rabbitmq bitnami/rabbitmq   --set auth.username=guest   --set auth.password=guest   --set auth.forcePassword=true   --set rabbitmq.extraConfiguration="loopback_users = none"
-    # end=curr_time
-    # elapsed_time= end-start
-    # echo "$elapsed_time" >> DEPLOYMENT_TIME

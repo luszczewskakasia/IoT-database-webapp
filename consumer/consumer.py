@@ -1,7 +1,6 @@
 import pika    
 import json
 import time
-# from server import app
 from database import SensorData, db
 from flask_cors import CORS
 from flask import Flask
@@ -11,7 +10,6 @@ CORS(app)
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@sensor-db-postgresql:5432/postgres"
-# db = SQLAlchemy(app)
 db.init_app(app)
 
 def wait_for_rabbitmq(host='rabbitmq'):
@@ -25,7 +23,6 @@ def wait_for_rabbitmq(host='rabbitmq'):
     for i in range(10):
         try:
             conn = pika.BlockingConnection(parameters)
-            # conn = pika.BlockingConnection(pika.ConnectionParameters(host=host))
             return conn
         except pika.exceptions.AMQPConnectionError as e:
             time.sleep(5)

@@ -18,20 +18,3 @@ class SensorData(db.Model):
         self.time = time
         self.sensor_type = sensor_type
         self.sensor_value = sensor_value   
-
-# Session = sessionmaker(bind=engine)
-
-# Base = declarative_base()
-# Base.query = Session.query_property()
-
-# class SensorData(Base):
-#     __tablename__ = 'sensor_data'
-#     id = Column(Integer, primary_key=True)
-#     time = Column(String)
-#     sensor_type = Column(String)
-#     sensor_value = Column(Float)
-
-#     def __init__(self, time, sensor_type, sensor_value):
-#         self.time = time
-#         self.sensor_type = sensor_type
-#         self.sensor_value = sensor_value

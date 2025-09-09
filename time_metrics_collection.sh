@@ -7,24 +7,13 @@ echo "iteration,start_time,deployment_time,stop_time,delete_time" > "$OUTPUT_FIL
 
 measure_times() {
     local iteration=$1
-    ### EXEC WAS CHANGED -> https://medium.com/@alesson.viana/installing-the-nginx-ingress-controller-on-k3s-df2c68cae3c8
-    # EARLIER WAS INSTALL_K3S_EXEC="--disable servicelb, traefik"
-    # curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" INSTALL_K3S_EXEC="--disable traefik" sh -s - --node-name k3s-master --selinux
+
     echo "start time - iteration $iteration"
     start_time=$(date +%s.%N)
     sudo snap install microk8s --classic --channel=1.32
     end_time=$(date +%s.%N)
     start_duration=$(echo "$end_time - $start_time" | bc)
-    # sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
-    # sudo chown $USER:$USER ~/.kube/config  
-    # cat mirror.sh | sudo tee /etc/rancher/k3s/registries.yaml
-    # sudo systemctl restart k3s
 
-    # sudo usermod -a -G microk8s $USER
-    # mkdir -p ~/.kube
-    # chmod 0700 ~/.kube
-    # su - $USER
-    # alias kubectl='microk8s kubectl'
     sudo mkdir -p /var/snap/microk8s/current/args/certs.d/192.168.100.15:8000
     sudo touch /var/snap/microk8s/current/args/certs.d/192.168.100.15:8000/hosts.toml
     cat mirror.sh | sudo tee /var/snap/microk8s/current/args/certs.d/192.168.100.15:8000/hosts.toml
@@ -85,6 +74,6 @@ for i in $(seq 1 $NUM_ITERATIONS); do
     measure_times $i
     echo "[INFO] Completed iteration $i"
 done
-# measure_times 1
+
 
 echo "[INFO] All measurements completed. Results saved in $OUTPUT_FILE"

@@ -14,8 +14,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: 192.168.100.15:8000/server:latest
-        imagePullPolicy: Always
+        image: 192.168.100.15:8000/server
         ports:
         - containerPort: 5000
 ---
@@ -33,3 +32,6 @@ spec:
       port: 5000
       targetPort: 5000
   type: ClusterIP
+
+# port - port Service
+# targetPort - port container i to musi być to samo co containerPort w Deployment
